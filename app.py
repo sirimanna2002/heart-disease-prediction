@@ -131,64 +131,62 @@ with tab3:
         )
         thal = thal_options[thal_label]
 
-st.write("---")
+    st.write("---")
 
-# ---------------- Prediction ----------------
-sex_val = 1 if sex == "Male" else 0
-fbs_val = 1 if fbs == "Yes" else 0
-exang_val = 1 if exang == "Yes" else 0
+    # ---------------- Prediction ----------------
+    sex_val = 1 if sex == "Male" else 0
+    fbs_val = 1 if fbs == "Yes" else 0
+    exang_val = 1 if exang == "Yes" else 0
 
-if st.button("🔍 Predict Risk", use_container_width=True):
-    input_data = np.array([[age, sex_val, cp, trestbps, chol, fbs_val, restecg,
-                             thalach, exang_val, oldpeak, slope, ca, thal]])
-    input_scaled = scaler.transform(input_data)
-    prediction = model.predict(input_scaled)[0]
-    probability = model.predict_proba(input_scaled)[0][1] * 100
+    if st.button("🔍 Predict Risk", use_container_width=True):
+        input_data = np.array([[age, sex_val, cp, trestbps, chol, fbs_val, restecg,
+                                 thalach, exang_val, oldpeak, slope, ca, thal]])
+        input_scaled = scaler.transform(input_data)
+        prediction = model.predict(input_scaled)[0]
+        probability = model.predict_proba(input_scaled)[0][1] * 100
 
-    st.write("### Result")
-    result_col1, result_col2 = st.columns([1, 1])
+        st.write("### Result")
+        result_col1, result_col2 = st.columns([1, 1])
 
-    with result_col1:
-        # Gauge Chart
-        fig = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=probability,
-            title={'text': "Heart Disease Risk (%)"},
-            gauge={
-                'axis': {'range': [0, 100]},
-                'bar': {'color': "darkred" if probability >= 50 else "green"},
-                'steps': [
-                    {'range': [0, 40], 'color': "#d4edda"},
-                    {'range': [40, 70], 'color': "#fff3cd"},
-                    {'range': [70, 100], 'color': "#f8d7da"}
-                ],
-            }
-        ))
-        fig.update_layout(height=300, margin=dict(l=20, r=20, t=50, b=20))
-        st.plotly_chart(fig, use_container_width=True)
+        with result_col1:
+            fig = go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=probability,
+                title={'text': "Heart Disease Risk (%)"},
+                gauge={
+                    'axis': {'range': [0, 100]},
+                    'bar': {'color': "darkred" if probability >= 50 else "green"},
+                    'steps': [
+                        {'range': [0, 40], 'color': "#d4edda"},
+                        {'range': [40, 70], 'color': "#fff3cd"},
+                        {'range': [70, 100], 'color': "#f8d7da"}
+                    ],
+                }
+            ))
+            fig.update_layout(height=300, margin=dict(l=20, r=20, t=50, b=20))
+            st.plotly_chart(fig, use_container_width=True)
 
-    with result_col2:
-        if prediction == 1:
-            st.error(f"⚠️ **High Risk** of Heart Disease Detected")
-        else:
-            st.success(f"✅ **Low Risk** of Heart Disease")
-        st.metric("Predicted Probability", f"{probability:.1f}%")
-        st.caption(
-            "This is a statistical estimate from a Machine Learning model, "
-            "not a medical diagnosis. Please consult a qualified doctor for "
-            "actual medical advice."
-        )
+        with result_col2:
+            if prediction == 1:
+                st.error(f"⚠️ **High Risk** of Heart Disease Detected")
+            else:
+                st.success(f"✅ **Low Risk** of Heart Disease")
+            st.metric("Predicted Probability", f"{probability:.1f}%")
+            st.caption(
+                "This is a statistical estimate from a Machine Learning model, "
+                "not a medical diagnosis. Please consult a qualified doctor for "
+                "actual medical advice."
+            )
 
-    # Expandable transparency section
-    with st.expander("🔎 How does this model decide? (Feature Importance)"):
-        st.write(
-            "The model was trained on clinical data and weighs the following "
-            "factors most heavily when predicting heart disease risk:"
-        )
-        st.write("""
-        1. **Max Heart Rate Achieved (thalach)**
-        2. **Chest Pain Type (cp)**
-        3. **ST Depression (oldpeak)**
-        4. **Thalassemia Result (thal)**
-        5. **Number of Major Vessels Blocked (ca)**
-        """)
+        with st.expander("🔎 How does this model decide? (Feature Importance)"):
+            st.write(
+                "The model was trained on clinical data and weighs the following "
+                "factors most heavily when predicting heart disease risk:"
+            )
+            st.write("""
+            1. **Max Heart Rate Achieved (thalach)**
+            2. **Chest Pain Type (cp)**
+            3. **ST Depression (oldpeak)**
+            4. **Thalassemia Result (thal)**
+            5. **Number of Major Vessels Blocked (ca)**
+            """)
