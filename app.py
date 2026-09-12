@@ -31,38 +31,56 @@ with st.sidebar:
         "⚠️ This tool provides a statistical estimate only. "
         "It is NOT a substitute for professional medical diagnosis."
     )
-    st.write("---")
-    st.caption("Built as part of a Capstone Project — Data Science II (DS3206)")
 
 # ---------------- Main Title ----------------
 st.title("❤️ Heart Disease Risk Prediction")
 st.write("Enter the patient's clinical details below to get an instant risk assessment.")
 st.write("---")
 
-# ---------------- Input Sections (Tabs) ----------------
-tab1, tab2, tab3 = st.tabs(["👤 Patient Info", "🩺 Vitals & Symptoms", "📋 Clinical Test Results"])
+# ---------------- Step Tracker (Session State) ----------------
+if "step" not in st.session_state:
+    st.session_state.step = 1
 
-with tab1:
+# Progress indicator
+steps = ["👤 Patient Info", "🩺 Vitals & Symptoms", "📋 Clinical Test Results"]
+progress_cols = st.columns(3)
+for i, col in enumerate(progress_cols, start=1):
+    with col:
+        if i == st.session_state.step:
+            st.markdown(f"**🔵 {steps[i-1]}**")
+        elif i < st.session_state.step:
+            st.markdown(f"✅ {steps[i-1]}")
+        else:
+            st.markdown(f"⚪ {steps[i-1]}")
+st.write("---")
+
+# ---------------- STEP 1: Patient Info ----------------
+if st.session_state.step == 1:
     col1, col2 = st.columns(2)
     with col1:
-        age = st.number_input("Age", min_value=20, max_value=100, value=50)
+        age = st.number_input("Age", min_value=20, max_value=100, value=50, key="age")
     with col2:
-        sex = st.selectbox("Sex", options=["Male", "Female"])
+        sex = st.selectbox("Sex", options=["Male", "Female"], key="sex")
 
-with tab2:
+    if st.button("Next ➡️", use_container_width=True):
+        st.session_state.step = 2
+        st.rerun()
+
+# ---------------- STEP 2: Vitals & Symptoms ----------------
+elif st.session_state.step == 2:
     col1, col2 = st.columns(2)
     with col1:
         trestbps = st.number_input(
             "Resting Blood Pressure (mm Hg)", min_value=80, max_value=220, value=120,
-            help="Patient's blood pressure while at rest."
+            help="Patient's blood pressure while at rest.", key="trestbps"
         )
         chol = st.number_input(
             "Cholesterol (mg/dl)", min_value=100, max_value=600, value=200,
-            help="Serum cholesterol level."
+            help="Serum cholesterol level.", key="chol"
         )
         fbs = st.selectbox(
             "Fasting Blood Sugar > 120 mg/dl?", options=["No", "Yes"],
-            help="Was the patient's fasting blood sugar level above 120 mg/dl?"
+            help="Was the patient's fasting blood sugar level above 120 mg/dl?", key="fbs"
         )
     with col2:
         cp_options = {
@@ -73,20 +91,29 @@ with tab2:
         }
         cp_label = st.selectbox(
             "Chest Pain Type", options=list(cp_options.keys()),
-            help="The type of chest pain the patient reports."
+            help="The type of chest pain the patient reports.", key="cp_label"
         )
-        cp = cp_options[cp_label]
-
         exang = st.selectbox(
             "Exercise Induced Angina?", options=["No", "Yes"],
-            help="Does the patient experience chest pain during exercise?"
+            help="Does the patient experience chest pain during exercise?", key="exang"
         )
         thalach = st.number_input(
             "Max Heart Rate Achieved", min_value=60, max_value=220, value=150,
-            help="Maximum heart rate the patient reached during a stress test."
+            help="Maximum heart rate the patient reached during a stress test.", key="thalach"
         )
 
-with tab3:
+    col_back, col_next = st.columns(2)
+    with col_back:
+        if st.button("⬅️ Back", use_container_width=True):
+            st.session_state.step = 1
+            st.rerun()
+    with col_next:
+        if st.button("Next ➡️", use_container_width=True):
+            st.session_state.step = 3
+            st.rerun()
+
+# ---------------- STEP 3: Clinical Test Results + Prediction ----------------
+elif st.session_state.step == 3:
     st.caption("These values normally come from ECG, stress test, or fluoroscopy reports.")
     col1, col2 = st.columns(2)
     with col1:
@@ -96,51 +123,62 @@ with tab3:
             "Left Ventricular Hypertrophy": 2
         }
         restecg_label = st.selectbox(
-            "Resting ECG Result", options=list(restecg_options.keys())
+            "Resting ECG Result", options=list(restecg_options.keys()), key="restecg_label"
         )
-        restecg = restecg_options[restecg_label]
-
         oldpeak = st.number_input(
             "ST Depression (Oldpeak)", min_value=0.0, max_value=7.0, value=1.0, step=0.1,
-            help="Amount of ST segment depression seen on ECG during exercise, relative to rest. Higher values suggest reduced blood flow to the heart."
+            help="Amount of ST segment depression seen on ECG during exercise, relative to rest.",
+            key="oldpeak"
         )
-
         slope_options = {
             "Upsloping (typically normal)": 0,
             "Flat (may suggest reduced blood flow)": 1,
             "Downsloping (most concerning pattern)": 2
         }
         slope_label = st.selectbox(
-            "Slope of Peak Exercise ST Segment", options=list(slope_options.keys())
+            "Slope of Peak Exercise ST Segment", options=list(slope_options.keys()), key="slope_label"
         )
-        slope = slope_options[slope_label]
-
     with col2:
         ca = st.selectbox(
             "Number of Major Vessels Blocked (0–4)", options=[0, 1, 2, 3, 4],
-            help="Number of major blood vessels showing narrowing, seen via fluoroscopy. 0 = best, 4 = worst."
+            help="Number of major blood vessels showing narrowing, seen via fluoroscopy.",
+            key="ca"
         )
-
         thal_options = {
             "Normal": 1,
             "Fixed Defect (permanent reduced blood flow)": 2,
             "Reversible Defect (reduced blood flow only during exercise)": 3
         }
         thal_label = st.selectbox(
-            "Thalassemia (Thallium Stress Test Result)", options=list(thal_options.keys())
+            "Thalassemia (Thallium Stress Test Result)", options=list(thal_options.keys()), key="thal_label"
         )
-        thal = thal_options[thal_label]
 
     st.write("---")
 
-    # ---------------- Prediction ----------------
-    sex_val = 1 if sex == "Male" else 0
-    fbs_val = 1 if fbs == "Yes" else 0
-    exang_val = 1 if exang == "Yes" else 0
+    col_back, col_predict = st.columns(2)
+    with col_back:
+        if st.button("⬅️ Back", use_container_width=True):
+            st.session_state.step = 2
+            st.rerun()
 
-    if st.button("🔍 Predict Risk", use_container_width=True):
-        input_data = np.array([[age, sex_val, cp, trestbps, chol, fbs_val, restecg,
-                                 thalach, exang_val, oldpeak, slope, ca, thal]])
+    with col_predict:
+        predict_clicked = st.button("🔍 Predict Risk", use_container_width=True)
+
+    if predict_clicked:
+        # ------- Convert all inputs back to model-ready values -------
+        sex_val = 1 if st.session_state.sex == "Male" else 0
+        fbs_val = 1 if st.session_state.fbs == "Yes" else 0
+        exang_val = 1 if st.session_state.exang == "Yes" else 0
+        cp = cp_options[cp_label]
+        restecg = restecg_options[restecg_label]
+        slope = slope_options[slope_label]
+        thal = thal_options[thal_label]
+
+        input_data = np.array([[
+            st.session_state.age, sex_val, cp, st.session_state.trestbps,
+            st.session_state.chol, fbs_val, restecg, st.session_state.thalach,
+            exang_val, oldpeak, slope, ca, thal
+        ]])
         input_scaled = scaler.transform(input_data)
         prediction = model.predict(input_scaled)[0]
         probability = model.predict_proba(input_scaled)[0][1] * 100
@@ -168,9 +206,9 @@ with tab3:
 
         with result_col2:
             if prediction == 1:
-                st.error(f"⚠️ **High Risk** of Heart Disease Detected")
+                st.error("⚠️ **High Risk** of Heart Disease Detected")
             else:
-                st.success(f"✅ **Low Risk** of Heart Disease")
+                st.success("✅ **Low Risk** of Heart Disease")
             st.metric("Predicted Probability", f"{probability:.1f}%")
             st.caption(
                 "This is a statistical estimate from a Machine Learning model, "
