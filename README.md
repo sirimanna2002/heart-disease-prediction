@@ -64,14 +64,12 @@ Early detection of heart disease can significantly improve patient outcomes. Thi
 
 ## 📂 Project Structure
 
-heart-disease-prediction/
-├── app.py # Streamlit web application
-├── heart_disease_model.pkl # Trained Random Forest model
-├── scaler.pkl # Fitted StandardScaler
-├── requirements.txt # Python dependencies
-├── notebook/
-│ └── heart_disease_analysis.ipynb # Full EDA, preprocessing & modeling notebook
-└── README.md
+- `app.py` — Streamlit web application
+- `heart_disease_model.pkl` — Trained Random Forest model
+- `scaler.pkl` — Fitted StandardScaler
+- `requirements.txt` — Python dependencies
+- `notebook/heart_disease_analysis.ipynb` — Full EDA, preprocessing & modeling notebook
+- `README.md` — Project documentation
 
 
 ## 🚀 Running Locally
