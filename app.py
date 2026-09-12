@@ -41,17 +41,21 @@ st.write("---")
 if "step" not in st.session_state:
     st.session_state.step = 1
 
-# Progress indicator
+# ---------------- Step Tracker (Clickable) ----------------
+if "step" not in st.session_state:
+    st.session_state.step = 1
+
 steps = ["👤 Patient Info", "🩺 Vitals & Symptoms", "📋 Clinical Test Results"]
 progress_cols = st.columns(3)
+
 for i, col in enumerate(progress_cols, start=1):
     with col:
-        if i == st.session_state.step:
-            st.markdown(f"**🔵 {steps[i-1]}**")
-        elif i < st.session_state.step:
-            st.markdown(f"✅ {steps[i-1]}")
-        else:
-            st.markdown(f"⚪ {steps[i-1]}")
+        label = f"🔵 {steps[i-1]}" if i == st.session_state.step else \
+                 (f"✅ {steps[i-1]}" if i < st.session_state.step else f"⚪ {steps[i-1]}")
+        if st.button(label, use_container_width=True, key=f"step_nav_{i}"):
+            st.session_state.step = i
+            st.rerun()
+
 st.write("---")
 
 # ---------------- STEP 1: Patient Info ----------------
