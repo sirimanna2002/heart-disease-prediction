@@ -87,5 +87,8 @@ This tool provides a statistical estimate based on a machine learning model and 
 
 ## 👩‍💻 Author
 
-Malsha Nethmini
-LinkedIn: (https://www.linkedin.com/in/malsha-nethmini-vk/)
+## 👩‍💻 Author
+
+**Malsha Nethmini**
+
+🔗 **LinkedIn:** [Malsha Nethmini](https://www.linkedin.com/in/malsha-nethmini-vk/)
