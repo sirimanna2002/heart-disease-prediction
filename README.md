@@ -1,4 +1,4 @@
-# ❤️ Heart Disease Risk Prediction
+# Heart Disease Risk Prediction
 
 A machine learning web application that predicts a patient's risk of heart disease based on clinical parameters. Built as a Clinical Decision Support Tool for healthcare professionals.
 
