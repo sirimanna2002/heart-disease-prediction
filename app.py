@@ -76,7 +76,7 @@ with st.sidebar:
     )
 
 # ---------------- Main Title ----------------
-st.title("❤️ Heart Disease Risk Prediction")
+st.title("Heart Disease Risk Prediction")
 st.write("Enter the patient's clinical details below to get an instant risk assessment.")
 st.write("---")
 
