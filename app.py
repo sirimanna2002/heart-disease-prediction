@@ -6,13 +6,56 @@ import plotly.graph_objects as go
 # ---------------- Page Configuration ----------------
 st.set_page_config(
     page_title="Heart Disease Risk Prediction",
-    page_icon="❤️",
     layout="wide"
 )
 
 # ---------------- Load Model & Scaler ----------------
 model = joblib.load('heart_disease_model.pkl')
 scaler = joblib.load('scaler.pkl')
+
+# ---------------- Option Dictionaries (defined once, used everywhere) ----------------
+cp_options = {
+    "Typical Angina (classic exertion-related chest pain)": 0,
+    "Atypical Angina (chest pain, non-classic pattern)": 1,
+    "Non-anginal Pain (chest pain unrelated to the heart)": 2,
+    "Asymptomatic (no chest pain reported)": 3
+}
+restecg_options = {
+    "Normal": 0,
+    "ST-T Wave Abnormality (possible ischemia)": 1,
+    "Left Ventricular Hypertrophy": 2
+}
+slope_options = {
+    "Upsloping (typically normal)": 0,
+    "Flat (may suggest reduced blood flow)": 1,
+    "Downsloping (most concerning pattern)": 2
+}
+thal_options = {
+    "Normal": 1,
+    "Fixed Defect (permanent reduced blood flow)": 2,
+    "Reversible Defect (reduced blood flow only during exercise)": 3
+}
+
+# ---------------- Default Values (prevents KeyError if user jumps steps) ----------------
+defaults = {
+    "step": 1,
+    "age": 50,
+    "sex": "Male",
+    "trestbps": 120,
+    "chol": 200,
+    "fbs": "No",
+    "cp_label": list(cp_options.keys())[0],
+    "exang": "No",
+    "thalach": 150,
+    "restecg_label": list(restecg_options.keys())[0],
+    "oldpeak": 1.0,
+    "slope_label": list(slope_options.keys())[0],
+    "ca": 0,
+    "thal_label": list(thal_options.keys())[0],
+}
+for key, value in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
 
 # ---------------- Sidebar ----------------
 with st.sidebar:
@@ -37,14 +80,7 @@ st.title("❤️ Heart Disease Risk Prediction")
 st.write("Enter the patient's clinical details below to get an instant risk assessment.")
 st.write("---")
 
-# ---------------- Step Tracker (Session State) ----------------
-if "step" not in st.session_state:
-    st.session_state.step = 1
-
 # ---------------- Step Tracker (Clickable) ----------------
-if "step" not in st.session_state:
-    st.session_state.step = 1
-
 steps = ["👤 Patient Info", "🩺 Vitals & Symptoms", "📋 Clinical Test Results"]
 progress_cols = st.columns(3)
 
@@ -62,9 +98,9 @@ st.write("---")
 if st.session_state.step == 1:
     col1, col2 = st.columns(2)
     with col1:
-        age = st.number_input("Age", min_value=20, max_value=100, value=50, key="age")
+        st.number_input("Age", min_value=20, max_value=100, key="age")
     with col2:
-        sex = st.selectbox("Sex", options=["Male", "Female"], key="sex")
+        st.selectbox("Sex", options=["Male", "Female"], key="sex")
 
     if st.button("Next ➡️", use_container_width=True):
         st.session_state.step = 2
@@ -74,35 +110,29 @@ if st.session_state.step == 1:
 elif st.session_state.step == 2:
     col1, col2 = st.columns(2)
     with col1:
-        trestbps = st.number_input(
-            "Resting Blood Pressure (mm Hg)", min_value=80, max_value=220, value=120,
+        st.number_input(
+            "Resting Blood Pressure (mm Hg)", min_value=80, max_value=220,
             help="Patient's blood pressure while at rest.", key="trestbps"
         )
-        chol = st.number_input(
-            "Cholesterol (mg/dl)", min_value=100, max_value=600, value=200,
+        st.number_input(
+            "Cholesterol (mg/dl)", min_value=100, max_value=600,
             help="Serum cholesterol level.", key="chol"
         )
-        fbs = st.selectbox(
+        st.selectbox(
             "Fasting Blood Sugar > 120 mg/dl?", options=["No", "Yes"],
             help="Was the patient's fasting blood sugar level above 120 mg/dl?", key="fbs"
         )
     with col2:
-        cp_options = {
-            "Typical Angina (classic exertion-related chest pain)": 0,
-            "Atypical Angina (chest pain, non-classic pattern)": 1,
-            "Non-anginal Pain (chest pain unrelated to the heart)": 2,
-            "Asymptomatic (no chest pain reported)": 3
-        }
-        cp_label = st.selectbox(
+        st.selectbox(
             "Chest Pain Type", options=list(cp_options.keys()),
             help="The type of chest pain the patient reports.", key="cp_label"
         )
-        exang = st.selectbox(
+        st.selectbox(
             "Exercise Induced Angina?", options=["No", "Yes"],
             help="Does the patient experience chest pain during exercise?", key="exang"
         )
-        thalach = st.number_input(
-            "Max Heart Rate Achieved", min_value=60, max_value=220, value=150,
+        st.number_input(
+            "Max Heart Rate Achieved", min_value=60, max_value=220,
             help="Maximum heart rate the patient reached during a stress test.", key="thalach"
         )
 
@@ -121,39 +151,24 @@ elif st.session_state.step == 3:
     st.caption("These values normally come from ECG, stress test, or fluoroscopy reports.")
     col1, col2 = st.columns(2)
     with col1:
-        restecg_options = {
-            "Normal": 0,
-            "ST-T Wave Abnormality (possible ischemia)": 1,
-            "Left Ventricular Hypertrophy": 2
-        }
-        restecg_label = st.selectbox(
+        st.selectbox(
             "Resting ECG Result", options=list(restecg_options.keys()), key="restecg_label"
         )
-        oldpeak = st.number_input(
-            "ST Depression (Oldpeak)", min_value=0.0, max_value=7.0, value=1.0, step=0.1,
+        st.number_input(
+            "ST Depression (Oldpeak)", min_value=0.0, max_value=7.0, step=0.1,
             help="Amount of ST segment depression seen on ECG during exercise, relative to rest.",
             key="oldpeak"
         )
-        slope_options = {
-            "Upsloping (typically normal)": 0,
-            "Flat (may suggest reduced blood flow)": 1,
-            "Downsloping (most concerning pattern)": 2
-        }
-        slope_label = st.selectbox(
+        st.selectbox(
             "Slope of Peak Exercise ST Segment", options=list(slope_options.keys()), key="slope_label"
         )
     with col2:
-        ca = st.selectbox(
+        st.selectbox(
             "Number of Major Vessels Blocked (0–4)", options=[0, 1, 2, 3, 4],
             help="Number of major blood vessels showing narrowing, seen via fluoroscopy.",
             key="ca"
         )
-        thal_options = {
-            "Normal": 1,
-            "Fixed Defect (permanent reduced blood flow)": 2,
-            "Reversible Defect (reduced blood flow only during exercise)": 3
-        }
-        thal_label = st.selectbox(
+        st.selectbox(
             "Thalassemia (Thallium Stress Test Result)", options=list(thal_options.keys()), key="thal_label"
         )
 
@@ -164,24 +179,22 @@ elif st.session_state.step == 3:
         if st.button("⬅️ Back", use_container_width=True):
             st.session_state.step = 2
             st.rerun()
-
     with col_predict:
         predict_clicked = st.button("🔍 Predict Risk", use_container_width=True)
 
     if predict_clicked:
-        # ------- Convert all inputs back to model-ready values -------
         sex_val = 1 if st.session_state.sex == "Male" else 0
         fbs_val = 1 if st.session_state.fbs == "Yes" else 0
         exang_val = 1 if st.session_state.exang == "Yes" else 0
-        cp = cp_options[cp_label]
-        restecg = restecg_options[restecg_label]
-        slope = slope_options[slope_label]
-        thal = thal_options[thal_label]
+        cp = cp_options[st.session_state.cp_label]
+        restecg = restecg_options[st.session_state.restecg_label]
+        slope = slope_options[st.session_state.slope_label]
+        thal = thal_options[st.session_state.thal_label]
 
         input_data = np.array([[
             st.session_state.age, sex_val, cp, st.session_state.trestbps,
             st.session_state.chol, fbs_val, restecg, st.session_state.thalach,
-            exang_val, oldpeak, slope, ca, thal
+            exang_val, st.session_state.oldpeak, slope, st.session_state.ca, thal
         ]])
         input_scaled = scaler.transform(input_data)
         prediction = model.predict(input_scaled)[0]
